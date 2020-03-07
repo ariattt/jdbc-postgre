@@ -1,5 +1,5 @@
 /*
-export CLASSPATH=postgresql.jar:.
+export CLASSPATH=.:postgresql-42.2.10.jar
 javac test.java
 java test
 */
@@ -10,7 +10,17 @@ import java.sql.*;
 import java.util.*;
 
 public class test {
-
+    static void shuffleArray(Integer[] ar)
+    {
+        Random rnd = new Random();
+        for (int i = ar.length - 1; i > 0; i--)
+        {
+            int index = rnd.nextInt(i + 1);
+            int a = ar[index];
+            ar[index] = ar[i];
+            ar[i] = a;
+        }
+  } 
     public static String randomString(int size){
         String ALPHA_NUMERIC_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         StringBuilder builder = new StringBuilder();
@@ -33,12 +43,41 @@ public class test {
             System.out.println("don't fuck w me");
         } 
     }
+
     public static class RandGenerator extends Generator{
         public RandGenerator(Connection conn){
             super(conn);
         }
         @Override
         public void popData() throws SQLException{
+            shuffleArray(keys);
+            Random rand = new Random(); 
+            
+            for(int j=0;j<10;j++){
+                int start = j*5000*100;
+                StringBuilder bder = new StringBuilder("insert into benchmark (theKey, columnA, columnB, filler)\n values\n");
+	        	for(int i=0;i<5000*100;i++){
+                   bder.append("(" + keys[start + i] + "," 
+                        + ((Integer)(rand.nextInt(50000)+1)) + "," 
+                        + ((Integer)(rand.nextInt(50000)+1)) + ","
+                        + "'" + randomString(247) + "'" 
+                        + "),\n");
+                } 
+		        bder.replace(bder.length()-2, bder.length(), ";\n");
+                
+                Statement stmt = conn.createStatement();
+		        stmt.executeUpdate(bder.toString());
+	            stmt.close();
+            }
+        }
+    }
+
+    public static class SeriGenerator extends Generator{
+        public SeriGenerator(Connection conn){
+            super(conn);
+        }
+        @Override
+        public void popData() throws SQLException {
             Random rand = new Random(); 
             
             for(int j=0;j<10;j++){
@@ -55,22 +94,7 @@ public class test {
                 Statement stmt = conn.createStatement();
 		        stmt.executeUpdate(bder.toString());
 	            stmt.close();
-            }
-        }
-    }
-
-    public static class SeriGenerator extends Generator{
-        public SeriGenerator(Connection conn){
-            super(conn);
-        }
-        @Override
-        public void popData() throws SQLException {
-      	    String insertString = 
-	      	    "insert into benchmark (theKey, columnA, columnB, filler)"+ 
-	         	"values (423, 76453, 23453, 'shithole')";
-		    Statement stmt = conn.createStatement();
-		    stmt.executeUpdate(insertString);
-	        stmt.close();
+            } 
         }
     }
 
@@ -149,7 +173,7 @@ public class test {
 		System.out.println("Connected to DB");
 
 
-      /* 
+       
 		try {
 			// drops if there
 			dropTable(conn);
@@ -161,9 +185,9 @@ public class test {
        
 		createTable(conn);
 		
-        Generator gen = new RandGenerator(conn);
+        Generator gen = new SeriGenerator(conn);
         gen.popData();
-        */
+        
         System.out.println("********************** Query 1 *************************");
         query(conn, "SELECT * FROM benchmark WHERE benchmark.columnA = 25000");
         System.out.println("********************** Query 2 *************************");
