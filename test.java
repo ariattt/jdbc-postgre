@@ -54,6 +54,7 @@ public class test {
             Random rand = new Random(); 
             
             for(int j=0;j<10;j++){
+                System.out.println("loading batch " + j + "out of 10");
                 int start = j*5000*100;
                 StringBuilder bder = new StringBuilder("insert into benchmark (theKey, columnA, columnB, filler)\n values\n");
 	        	for(int i=0;i<5000*100;i++){
@@ -110,7 +111,8 @@ public class test {
             ")" ;
 	    Statement stmt = conn.createStatement();
 	    stmt.executeUpdate(createString);
-	    stmt.close();
+        stmt.close();
+		System.out.println("table created!");
 	}
 
 
@@ -148,7 +150,12 @@ public class test {
 		}
 		rs.close();
 	    stmt.close();
-	
+    }
+
+    public static void q_index(Connection conn, String query) throws SQLException{
+        Statement stmt = conn.createStatement();
+        stmt.executeUpdate(query);
+        stmt.close();
     }
 
 
@@ -164,39 +171,66 @@ public class test {
 
 	public static void main(String[] args) throws SQLException, ClassNotFoundException {
 
-   		System.out.println("loading driver");
+        System.out.println("loading driver");
 		Class.forName("org.postgresql.Driver");
 		System.out.println("driver loaded");
 
-		System.out.println("Connecting to DB");
-		Connection conn = DriverManager.getConnection("jdbc:postgresql:postgres", "postgres", "secret");
+        System.out.println("Connecting to DB");
+        Connection conn = DriverManager.getConnection("jdbc:postgresql://database-1.cjcabtjymlhl.us-east-1.rds.amazonaws.com:5432/mydb?user=postgres&password=53589Wmh");
+
+		// Connection conn = DriverManager.getConnection("jdbc:postgresql:postgres", "postgres", "secret");
 		System.out.println("Connected to DB");
-
-
        
-		try {
-			// drops if there
-			dropTable(conn);
-		}
-		catch (Exception e) {
-            System.out.println("drop table exception :" + e.toString());
-        }
-        
-       
-		createTable(conn);
-		
-        Generator gen = new SeriGenerator(conn);
-        gen.popData();
-        
-        System.out.println("********************** Query 1 *************************");
-        query(conn, "SELECT * FROM benchmark WHERE benchmark.columnA = 25000");
-        System.out.println("********************** Query 2 *************************");
-        query(conn, "SELECT * FROM benchmark WHERE benchmark.columnB = 25000");
-        System.out.println("********************** Query 3 *************************");
-        query(conn, "SELECT * FROM benchmark WHERE benchmark.columnA = 25000 AND benchmark.columnB = 25000");
+        long startTime;
+        boolean createTable = true;
+        // if (createTable){
+        //     try {
+        //         // drops if there
+        //         dropTable(conn);
+        //     }
+        //     catch (Exception e) {
+        //         System.out.println("drop table exception :" + e.toString());
+        //     }
+            
+        //     createTable(conn);
+            
+        //     Generator gen = new RandGenerator(conn);
+        //     startTime = System.currentTimeMillis();
+        //     gen.popData();
+        //     long creatTime = System.currentTimeMillis() - startTime;
+        //     System.out.println(creatTime);
+        // }
 
-        //printTable(conn);
-		//dropTable(conn);
+        startTime = System.currentTimeMillis();
+        q_index(conn, "CREATE INDEX  a_index  ON benchmark(columnA)");
+        // q_index(conn, "CREATE INDEX  b_index  ON benchmark(columnB)");
+        // q_index(conn, "DROP INDEX  a_index");
+        long indexTime = System.currentTimeMillis() - startTime;
+        System.out.println(indexTime);
+
+        // String point1 = "25005";
+        // String point2 = "25005";
+        // System.out.println("********************** Query 1 *************************");
+		// startTime = System.currentTimeMillis();
+        // query(conn, "SELECT * FROM benchmark WHERE benchmark.columnA = " + point1);
+        // long t1 = System.currentTimeMillis() - startTime;
+        
+        // System.out.println("********************** Query 2 *************************");
+        // startTime = System.currentTimeMillis();
+        // query(conn, "SELECT * FROM benchmark WHERE benchmark.columnB = " + point2);
+        // long t2 = System.currentTimeMillis() - startTime;
+
+        // System.out.println("********************** Query 3 *************************");
+        // startTime = System.currentTimeMillis();
+        // query(conn, "SELECT * FROM benchmark WHERE benchmark.columnA = " + point1 + " AND benchmark.columnB = " + point2);
+        // long t3= System.currentTimeMillis() - startTime;
+
+ 
+        // System.out.println(t1);
+        // System.out.println(t2);
+        // System.out.println(t3);
+
+        //dropTable(conn);
 
 	}
 
