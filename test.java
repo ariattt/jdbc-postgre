@@ -53,11 +53,11 @@ public class test {
             shuffleArray(keys);
             Random rand = new Random(); 
             
-            for(int j=0;j<10;j++){
+            for(int j=0;j<100;j++){
                 System.out.println("loading batch " + j + "out of 10");
-                int start = j*5000*100;
+                int start = j*5000*10;
                 StringBuilder bder = new StringBuilder("insert into benchmark (theKey, columnA, columnB, filler)\n values\n");
-	        	for(int i=0;i<5000*100;i++){
+	        	for(int i=0;i<5000*10;i++){
                    bder.append("(" + keys[start + i] + "," 
                         + ((Integer)(rand.nextInt(50000)+1)) + "," 
                         + ((Integer)(rand.nextInt(50000)+1)) + ","
@@ -176,44 +176,44 @@ public class test {
 		System.out.println("driver loaded");
 
         System.out.println("Connecting to DB");
-        Connection conn = DriverManager.getConnection("jdbc:postgresql://database-1.cjcabtjymlhl.us-east-1.rds.amazonaws.com:5432/mydb?user=postgres&password=53589Wmh");
+        Connection conn = DriverManager.getConnection("jdbc:postgresql://database-1.cjcabtjymlhl.us-east-1.rds.amazonaws.com:5432/mydb?user=postgres&password=password"); password blurred
 
 		// Connection conn = DriverManager.getConnection("jdbc:postgresql:postgres", "postgres", "secret");
 		System.out.println("Connected to DB");
        
         long startTime;
         boolean createTable = true;
-        // if (createTable){
-        //     try {
-        //         // drops if there
-        //         dropTable(conn);
-        //     }
-        //     catch (Exception e) {
-        //         System.out.println("drop table exception :" + e.toString());
-        //     }
+        if (createTable){
+            try {
+                // drops if there
+                dropTable(conn);
+            }
+            catch (Exception e) {
+                System.out.println("drop table exception :" + e.toString());
+            }
             
-        //     createTable(conn);
+            createTable(conn);
             
-        //     Generator gen = new RandGenerator(conn);
-        //     startTime = System.currentTimeMillis();
-        //     gen.popData();
-        //     long creatTime = System.currentTimeMillis() - startTime;
-        //     System.out.println(creatTime);
-        // }
+            Generator gen = new RandGenerator(conn);
+            startTime = System.currentTimeMillis();
+            gen.popData();
+            long creatTime = System.currentTimeMillis() - startTime;
+            System.out.println(creatTime);
+        }
 
-        startTime = System.currentTimeMillis();
-        q_index(conn, "CREATE INDEX  a_index  ON benchmark(columnA)");
-        // q_index(conn, "CREATE INDEX  b_index  ON benchmark(columnB)");
-        // q_index(conn, "DROP INDEX  a_index");
-        long indexTime = System.currentTimeMillis() - startTime;
-        System.out.println(indexTime);
+        // startTime = System.currentTimeMillis();
+        // q_index(conn, "CREATE INDEX  a_index  ON benchmark(columnA)");
+        // // q_index(conn, "CREATE INDEX  b_index  ON benchmark(columnB)");
+        // // q_index(conn, "DROP INDEX  a_index");
+        // long indexTime = System.currentTimeMillis() - startTime;
+        // System.out.println(indexTime);
 
-        // String point1 = "25005";
-        // String point2 = "25005";
-        // System.out.println("********************** Query 1 *************************");
-		// startTime = System.currentTimeMillis();
-        // query(conn, "SELECT * FROM benchmark WHERE benchmark.columnA = " + point1);
-        // long t1 = System.currentTimeMillis() - startTime;
+        String point1 = "25005";
+        String point2 = "25005";
+        System.out.println("********************** Query 1 *************************");
+		startTime = System.currentTimeMillis();
+        query(conn, "SELECT * FROM benchmark WHERE benchmark.columnA = " + point1);
+        long t1 = System.currentTimeMillis() - startTime;
         
         // System.out.println("********************** Query 2 *************************");
         // startTime = System.currentTimeMillis();
@@ -230,7 +230,7 @@ public class test {
         // System.out.println(t2);
         // System.out.println(t3);
 
-        //dropTable(conn);
+        dropTable(conn);
 
 	}
 
